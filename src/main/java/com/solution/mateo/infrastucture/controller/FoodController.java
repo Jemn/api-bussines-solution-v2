@@ -51,6 +51,11 @@ public class FoodController {
         return foodInputPort.findAll(pageable);
     }
 
+    @GetMapping("/prueba")
+    public Flux<String> getprueba() {
+        return Flux.just("No hay datos");
+    }
+
     @Operation(summary = "find Food", description = "find Food by Id")
     @ApiResponses(value = {
             @ApiResponse(responseCode = "200", description = "operation success"),
