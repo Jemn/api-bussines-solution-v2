@@ -176,8 +176,11 @@ class FoodAdapterTest {
 
     @Test
     void  findAll(){
+        Sort sort = "desc".equalsIgnoreCase("desc") ? Sort.by("id").descending() : Sort.by("desc").ascending();
+        PageRequest pageable = PageRequest.of(0, 10, sort);
 
-        Mockito.when(foodRepository.findAll()).thenReturn(
+
+        Mockito.when(foodRepository.findAll(sort)).thenReturn(
                 Flux.just(
                         FoodEntity.builder()
                                 .idAlimento("11111111111")
@@ -197,8 +200,6 @@ class FoodAdapterTest {
                         .usuarioInsert("E0001200")
                         .build();
 
-        Sort sort = "desc".equalsIgnoreCase("desc") ? Sort.by("id").descending() : Sort.by("desc").ascending();
-        PageRequest pageable = PageRequest.of(0, 10, sort);
 
         Flux<Food> food=foodOutputPort.findAll(pageable);
 

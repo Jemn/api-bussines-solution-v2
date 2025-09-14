@@ -10,6 +10,8 @@ import org.junit.jupiter.api.BeforeEach;
 import org.junit.jupiter.api.Test;
 import org.mockito.Mockito;
 import org.springframework.boot.test.context.SpringBootTest;
+import org.springframework.data.domain.PageRequest;
+import org.springframework.data.domain.Sort;
 import reactor.core.publisher.Flux;
 import reactor.core.publisher.Mono;
 import reactor.test.StepVerifier;
@@ -24,6 +26,7 @@ public class FormulaServiceTest {
     void setUp(){
         formulaOutputPort= Mockito.mock(FormulaOutputPort.class);
         formulaImputPort=new FormulaService(formulaOutputPort);
+
     }
 
     @Test
@@ -164,12 +167,13 @@ public class FormulaServiceTest {
         formula.setUsuarioUpdate("E0001200");
         //.fechaUpdate(null)
         formula.setUsuarioDelete("E0001200");
-
-        Mockito.when(formulaOutputPort.findAll()).thenReturn(
+        Sort sort = "desc".equalsIgnoreCase("desc") ? Sort.by("name").descending() : Sort.by("name").ascending();
+        PageRequest pageable = PageRequest.of(0, 10, sort);
+        Mockito.when(formulaOutputPort.findAll(pageable)).thenReturn(
                 Flux.just(formula)
         );
 
-        Flux<Formula> foodEntityMono=formulaImputPort.findAll();
+        Flux<Formula> foodEntityMono=formulaImputPort.findAll(pageable);
         StepVerifier.create(foodEntityMono)
                 .expectNext(formula)
                 .verifyComplete();
