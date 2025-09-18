@@ -4,6 +4,7 @@ import com.solution.mateo.application.mapper.SolutionMapper;
 import com.solution.mateo.application.util.Constantes;
 import com.solution.mateo.domain.cun.FormulaProductoDTO;
 import com.solution.mateo.domain.cun.SolutionCun;
+import com.solution.mateo.domain.cun.SolutionListResponseDTO;
 import com.solution.mateo.domain.cun.SolutionResponseDTO;
 import com.solution.mateo.domain.dto.CreateSolutionRequestDTO;
 import com.solution.mateo.domain.model.BodyResponse;
@@ -334,4 +335,191 @@ public class SolutionAdapter implements SolutionOutputPort {
                 });
 
     }
+
+    @Override
+    public Flux<SolutionListResponseDTO> finAllListPagination(Pageable pageable, String nombreFood) {
+
+        AggregationOperation addFieldsPlague = addFields()
+                .addField("idPlagues") // New field
+                .withValue(ConvertOperators.ToObjectId.toObjectId("$idPlague")) // Convert to ObjectId
+                .build();
+
+        LookupOperation lookupOperation = LookupOperation.newLookup()
+                .from("plague")
+                .localField("idPlagues")
+                .foreignField("_id")
+                .as("plagueTemp");
+
+        AggregationOperation addFieldsFood = addFields()
+                .addField("idFoods") // New field
+                .withValue(ConvertOperators.ToObjectId.toObjectId("$idAlimento")) // Convert to ObjectId
+                .build();
+
+        LookupOperation lookupFood = LookupOperation.newLookup()
+                .from("food")
+                .localField("idFoods")
+                .foreignField("_id")
+                .as("foodTemp");
+
+        MatchOperation matchOperation = Aggregation.match(
+                Criteria.where("foodTemp.name").regex(
+                        Pattern.compile(nombreFood, Pattern.CASE_INSENSITIVE)
+                )
+        );
+
+        AggregationOperation addFieldsFormula = addFields()
+                .addField("idFormulas") // New field
+                .withValue(ConvertOperators.ToObjectId.toObjectId("$idFormula")) // Convert to ObjectId
+                .build();
+
+        LookupOperation lookupFormula = LookupOperation.newLookup()
+                .from("formula")
+                .localField("idFormulas")
+                .foreignField("_id")
+                .as("formulaTemp");
+
+        AggregationOperation addFieldsRegion = addFields()
+                .addField("idRegions") // New field
+                .withValue(ConvertOperators.ToObjectId.toObjectId("$idRegion")) // Convert to ObjectId
+                .build();
+
+        LookupOperation lookupRegion = LookupOperation.newLookup()
+                .from("region")
+                .localField("idRegions")
+                .foreignField("_id")
+                .as("regionTemp");
+
+        ProjectionOperation projectOperation = Aggregation.project("id")
+                .and("foodTemp.name").as("nombreAlimento")
+                .and("formulaTemp.presentacion").as("nombreFormula")
+                .and("plagueTemp.nombre").as("nombrePlague")
+                .and("regionTemp.nombre").as("nombreRegion");
+
+        // Calcula el número de documentos a saltar.
+        long skipObj = pageable.getOffset();
+        // Obtiene el tamaño de la página.
+        long limitObj = pageable.getPageSize();
+
+        Aggregation aggregation = Aggregation.newAggregation(
+                addFieldsPlague,
+                lookupOperation,
+                addFieldsFood,
+                lookupFood,
+                matchOperation,
+                addFieldsFormula,
+                lookupFormula,
+                addFieldsRegion,
+                lookupRegion,
+                projectOperation,
+                skip(skipObj),
+                limit(limitObj)
+        );
+        return reactiveMongoTemplate.aggregate(aggregation, "solution", SolutionListResponseDTO.class)
+                .onErrorResume(e -> {
+                    // Log the error or handle it gracefully
+                    log.info("Error during aggregation: " + e.getMessage());
+                    return Flux.empty(); // Return an empty Flux as fallback
+                });
+
+    }
+
+
+
+    @Override
+    public Flux<SolutionResponseDTO> finByIDPagination(String id) {
+        log.info(" Iniciando metodo finByIDPagination  "+id);
+        // Match the document by its ID.
+        MatchOperation matchOperation = Aggregation.match(Criteria.where("_id").is(id));
+
+        AggregationOperation addFieldsPlague = addFields()
+                .addField("idPlagues") // New field
+                .withValue(ConvertOperators.ToObjectId.toObjectId("$idPlague")) // Convert to ObjectId
+                .build();
+
+        LookupOperation lookupOperation = LookupOperation.newLookup()
+                .from("plague")
+                .localField("idPlagues")
+                .foreignField("_id")
+                .as("plagueTemp");
+
+        AggregationOperation addFieldsFood = addFields()
+                .addField("idFoods") // New field
+                .withValue(ConvertOperators.ToObjectId.toObjectId("$idAlimento")) // Convert to ObjectId
+                .build();
+
+        LookupOperation lookupFood = LookupOperation.newLookup()
+                .from("food")
+                .localField("idFoods")
+                .foreignField("_id")
+                .as("foodTemp");
+
+        AggregationOperation addFieldsFormula = addFields()
+                .addField("idFormulas") // New field
+                .withValue(ConvertOperators.ToObjectId.toObjectId("$idFormula")) // Convert to ObjectId
+                .build();
+
+        LookupOperation lookupFormula = LookupOperation.newLookup()
+                .from("formula")
+                .localField("idFormulas")
+                .foreignField("_id")
+                .as("formulaTemp");
+
+        AggregationOperation addFieldsRegion = addFields()
+                .addField("idRegions") // New field
+                .withValue(ConvertOperators.ToObjectId.toObjectId("$idRegion")) // Convert to ObjectId
+                .build();
+
+        LookupOperation lookupRegion = LookupOperation.newLookup()
+                .from("region")
+                .localField("idRegions")
+                .foreignField("_id")
+                .as("regionTemp");
+
+        // Project the required fields. We only need to project the final output.
+        ProjectionOperation projectOperation = Aggregation.project(
+                        "id",
+                        "idAlimento",
+                        "idFormula",
+                        "idPlague",
+                        "periodoAplicacion",
+                        "tiempoAplicacion",
+                        "sugerencia",
+                        "flagEli",
+                        "idRegion",
+                        "fechaInsert",
+                        "usuarioInsert",
+                        "fechaUpdate",
+                        "usuarioUpdate",
+                        "fechaDelete",
+                        "usuarioDelete"
+
+                )
+                .and("foodTemp.name").as("nombreAlimento")
+                .and("formulaTemp.presentacion").as("nombreFormula")
+                .and("plagueTemp.nombre").as("nombrePlague")
+                .and("regionTemp.nombre").as("nombreRegion");
+
+        Aggregation aggregation = Aggregation.newAggregation(
+                matchOperation,
+                addFieldsPlague,
+                lookupOperation,
+                addFieldsFood,
+                lookupFood,
+                matchOperation,
+                addFieldsFormula,
+                lookupFormula,
+                addFieldsRegion,
+                lookupRegion,
+                projectOperation
+        );
+
+        return reactiveMongoTemplate.aggregate(aggregation, "solution", SolutionResponseDTO.class)
+                .onErrorResume(e -> {
+                    log.info("Error during aggregation: " + e.getMessage());
+                    return Flux.empty();
+                });
+    }
+
+
+
 }

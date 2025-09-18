@@ -1,6 +1,7 @@
 package com.solution.mateo.infrastucture.controller;
 
 import com.solution.mateo.domain.cun.SolutionCun;
+import com.solution.mateo.domain.cun.SolutionListResponseDTO;
 import com.solution.mateo.domain.cun.SolutionResponseDTO;
 import com.solution.mateo.domain.dto.CreateSolutionRequestDTO;
 import com.solution.mateo.domain.model.BodyResponse;
@@ -39,6 +40,7 @@ public class SolutionController {
         return solutionImputPort.save(solution,idtransacion);
     }
 
+
     @Operation(summary = "get Food", description = "get Food of bd")
     @ApiResponses(value = {
             @ApiResponse(responseCode = "200", description = "operation success"),
@@ -69,6 +71,7 @@ public class SolutionController {
         return solutionImputPort.findById(id,idtransacion);
     }
 
+
     @Operation(summary = "update", description = "update Food en bd")
     @ApiResponses(value = {
             @ApiResponse(responseCode = "200", description = "operation success"),
@@ -79,6 +82,7 @@ public class SolutionController {
                                                      @RequestHeader("idTransaccion") String idtransacion) {
         return solutionImputPort.update(solution,idtransacion);
     }
+
 
     @Operation(summary = "delete", description = "delete Food of bd")
     @ApiResponses(value = {
@@ -91,6 +95,7 @@ public class SolutionController {
         return solutionImputPort.deleteById(id);
     }
 
+
     @Operation(summary = "find Solution by name of plague", description = "find Solution by name of plague")
     @ApiResponses(value = {
             @ApiResponse(responseCode = "200", description = "operation success"),
@@ -102,7 +107,8 @@ public class SolutionController {
         return solutionImputPort.findBynamePlague(name,idtransacion);
     }
 
-    @Operation(summary = "get Formula", description = "get Formula of bd")
+
+    @Operation(summary = "get Solution", description = "get Formula of bd")
     @ApiResponses(value = {
             @ApiResponse(responseCode = "200", description = "operation success"),
             @ApiResponse(responseCode = "400", description = "Problema Interno")
@@ -118,5 +124,36 @@ public class SolutionController {
         Sort sort = sortDirection.equalsIgnoreCase("desc") ? Sort.by(sortBy).descending() : Sort.by(sortBy).ascending();
         PageRequest pageable = PageRequest.of(page, size, sort);
         return solutionImputPort.finAllPagination(pageable,nombreFood);
+    }
+
+    @Operation(summary = "list Solution", description = "get Solution of bd")
+    @ApiResponses(value = {
+            @ApiResponse(responseCode = "200", description = "operation success"),
+            @ApiResponse(responseCode = "400", description = "Problema Interno")
+    })
+    @GetMapping("/listSolution")
+    public Flux<SolutionListResponseDTO> listSolution(@RequestParam(defaultValue = "0") int page,
+                                                      @RequestParam(defaultValue = "10") int size,
+                                                      @RequestParam(defaultValue = "id") String sortBy,
+                                                      @RequestParam(defaultValue = "asc") String sortDirection,
+                                                      @RequestParam(defaultValue = " ")String nombreFood,
+                                                      @RequestHeader("idTransaccion") String idtransacion) {
+        log.info(objClass+idtransacion+"Iniciando metodo listSolution  "+nombreFood);
+        Sort sort = sortDirection.equalsIgnoreCase("desc") ? Sort.by(sortBy).descending() : Sort.by(sortBy).ascending();
+        PageRequest pageable = PageRequest.of(page, size, sort);
+        return solutionImputPort.finAllListPagination(pageable,nombreFood);
+    }
+
+    @Operation(summary = "get Solution", description = "get Formula of bd")
+    @ApiResponses(value = {
+            @ApiResponse(responseCode = "200", description = "operation success"),
+            @ApiResponse(responseCode = "400", description = "Problema Interno")
+    })
+    @GetMapping("/findbysolution")
+    public Flux<SolutionResponseDTO> findbysolution(@RequestParam(defaultValue = " ")String idSolution,
+                                                    @RequestHeader("idTransaccion") String idtransacion) {
+        log.info(objClass+idtransacion+" Iniciando metodo findbysolution  "+idSolution);
+
+        return solutionImputPort.finByIDPagination(idSolution);
     }
 }

@@ -1,6 +1,7 @@
 package com.solution.mateo.application.service;
 
 import com.solution.mateo.domain.cun.SolutionCun;
+import com.solution.mateo.domain.cun.SolutionListResponseDTO;
 import com.solution.mateo.domain.cun.SolutionResponseDTO;
 import com.solution.mateo.domain.dto.CreateSolutionRequestDTO;
 import com.solution.mateo.domain.model.BodyResponse;
@@ -53,5 +54,15 @@ public class SolutionService implements SolutionImputPort {
     @Override
     public Flux<SolutionResponseDTO> finAllPagination(Pageable pageable,String nombreFood) {
         return solutionOutputPort.finAllPagination(pageable,nombreFood);
+    }
+
+    @Override
+    public Flux<SolutionListResponseDTO> finAllListPagination(Pageable pageable, String nombreFood) {
+        return solutionOutputPort.finAllListPagination(pageable,nombreFood);
+    }
+
+    @Override
+    public Flux<SolutionResponseDTO> finByIDPagination( String id) {
+        return solutionOutputPort.finByIDPagination(id);
     }
 }

@@ -1,6 +1,7 @@
 package com.solution.mateo.domain.port.out;
 
 import com.solution.mateo.domain.cun.SolutionCun;
+import com.solution.mateo.domain.cun.SolutionListResponseDTO;
 import com.solution.mateo.domain.cun.SolutionResponseDTO;
 import com.solution.mateo.domain.dto.CreateSolutionRequestDTO;
 import com.solution.mateo.domain.model.BodyResponse;
@@ -18,4 +19,6 @@ public interface SolutionOutputPort {
     Mono<Void> deleteById(String id);
     Flux<Solution> findAll(Pageable pageable);
     Flux<SolutionResponseDTO> finAllPagination(Pageable pageable,String nombreFood);
+    Flux<SolutionListResponseDTO> finAllListPagination(Pageable pageable, String nombreFood);
+    Flux<SolutionResponseDTO> finByIDPagination( String id);
 }
